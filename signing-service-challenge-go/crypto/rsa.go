@@ -12,6 +12,15 @@ type RSAKeyPair struct {
 	Private *rsa.PrivateKey
 }
 
+// Implement KeyPair interface for RSAKeyPair
+func (kp *RSAKeyPair) PublicKey() interface{} {
+	return kp.Public
+}
+
+func (kp *RSAKeyPair) PrivateKey() interface{} {
+	return kp.Private
+}
+
 // RSAMarshaler can encode and decode an RSA key pair.
 type RSAMarshaler struct{}
 

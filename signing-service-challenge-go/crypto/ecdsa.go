@@ -12,6 +12,15 @@ type ECCKeyPair struct {
 	Private *ecdsa.PrivateKey
 }
 
+// Implement KeyPair interface for ECCKeyPair
+func (kp *ECCKeyPair) PublicKey() interface{} {
+	return kp.Public
+}
+
+func (kp *ECCKeyPair) PrivateKey() interface{} {
+	return kp.Private
+}
+
 // ECCMarshaler can encode and decode an ECC key pair.
 type ECCMarshaler struct{}
 

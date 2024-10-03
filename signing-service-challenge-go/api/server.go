@@ -20,16 +20,19 @@ type ErrorResponse struct {
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
 	listenAddress    string
-	persistenceLayer *persistence.InMemoryPersistence
+	deviceStore      *persistence.InMemoryDeviceStore
+	transactionStore *persistence.InMemoryTransactionStore
 }
 
 // NewServer is a factory to instantiate a new Server.
 func NewServer(listenAddress string) *Server {
-	persistence := persistence.NewInMemoryPersistence()
+	devicePersistence := persistence.NewInMemoryDeviceStore()
+	transactionPersistence := persistence.NewInMemoryTransactionStore()
 	return &Server{
 		listenAddress: listenAddress,
 		// TODO: add services / further dependencies here ...
-		persistenceLayer: persistence,
+		deviceStore:      devicePersistence,
+		transactionStore: transactionPersistence,
 	}
 }
 

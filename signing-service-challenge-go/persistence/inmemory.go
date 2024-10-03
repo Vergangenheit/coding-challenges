@@ -1,20 +1,58 @@
 package persistence
 
-// TODO: in-memory persistence ...
-type InMemoryPersistence map[string]interface{}
+import (
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
+	"github.com/google/uuid"
+)
 
-func NewInMemoryPersistence() *InMemoryPersistence {
-	return &InMemoryPersistence{}
+// TODO: in-memory persistence ...
+type InMemoryDeviceStore map[string]interface{}
+
+func NewInMemoryDeviceStore() *InMemoryDeviceStore {
+	return &InMemoryDeviceStore{}
 }
 
-func (p *InMemoryPersistence) Save(key string, value interface{}) {
+func (p *InMemoryDeviceStore) Save(key string, value interface{}) {
 	(*p)[key] = value
 }
 
-func (p *InMemoryPersistence) GetAll() []interface{} {
+func (p *InMemoryDeviceStore) GetById(id string) *domain.SignatureDevice {
+	inter := (*p)[id]
+	device, ok := inter.(*domain.SignatureDevice)
+	if !ok {
+		return nil
+	}
+	return device
+}
+
+func (p *InMemoryDeviceStore) GetAll() []interface{} {
 	values := make([]interface{}, 0, len(*p))
 	for _, value := range *p {
 		values = append(values, value)
 	}
 	return values
+}
+
+type InMemoryTransactionStore map[string]interface{}
+
+func NewInMemoryTransactionStore() *InMemoryTransactionStore {
+	return &InMemoryTransactionStore{}
+}
+
+func (p *InMemoryTransactionStore) Save(value interface{}) {
+	// create key as uuid string
+	id := uuid.New().String()
+	(*p)[id] = value
+}
+
+// extract all transactions handled by a specific device
+func (p *InMemoryTransactionStore) GetByDevice(deviceId string) []*domain.Transaction {
+	deviceTransactions := make([]*domain.Transaction, 0)
+	for _, value := range *p {
+		transaction := value.(*domain.Transaction)
+		if transaction.DeviceId == deviceId {
+			deviceTransactions = append(deviceTransactions, transaction)
+		}
+	}
+	return deviceTransactions
 }

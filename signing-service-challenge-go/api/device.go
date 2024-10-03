@@ -74,6 +74,8 @@ func (s *Server) CreateSignatureDevice(response http.ResponseWriter, request *ht
 			WriteInternalError(response)
 			return
 		}
+		// TODO write response
+		WriteAPIResponse(response, http.StatusCreated, signDevice)
 	case http.MethodGet:
 		// get all devices
 		if s.persistenceLayer != nil {

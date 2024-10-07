@@ -5,4 +5,24 @@ type Signer interface {
 	Sign(dataToBeSigned []byte) ([]byte, error)
 }
 
-// TODO: implement RSA and ECDSA signing ...
+type RSASigner struct{}
+
+func NewRSASigner() Signer {
+	return &RSASigner{}
+}
+
+func (s *RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
+
+	return dataToBeSigned, nil
+}
+
+type ECDSASigner struct{}
+
+func NewECDSASigner() Signer {
+	return &ECDSASigner{}
+}
+
+func (s *ECDSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
+
+	return dataToBeSigned, nil
+}

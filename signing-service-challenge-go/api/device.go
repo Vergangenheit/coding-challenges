@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
@@ -12,13 +13,18 @@ import (
 
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
-	uuid "github.com/google/uuid"
 )
 
 // TODO: REST endpoints ...
-func (s *Server) CreateSignatureDevice(response http.ResponseWriter, request *http.Request) {
+func (s *Server) SignatureDevice(response http.ResponseWriter, request *http.Request) {
 	switch request.Method {
 	case http.MethodPost:
+		if request.Body == nil {
+			WriteErrorResponse(response, http.StatusBadRequest, []string{
+				"request body must not be empty",
+			})
+			return
+		}
 		// decode body
 		signDevice := &domain.SignatureDevice{}
 		if err := json.NewDecoder(request.Body).Decode(signDevice); err != nil {
@@ -26,10 +32,6 @@ func (s *Server) CreateSignatureDevice(response http.ResponseWriter, request *ht
 				http.StatusText(http.StatusBadRequest),
 			})
 			return
-		}
-		// assign id
-		if signDevice.Id == "" {
-			signDevice.Id = uuid.New().String()
 		}
 		// generate key pair
 		switch signDevice.SignatureAlgorithm {
@@ -61,7 +63,7 @@ func (s *Server) CreateSignatureDevice(response http.ResponseWriter, request *ht
 		}
 		// persist signDevice
 		if s.deviceStore != nil {
-			s.deviceStore.Save(string(signDevice.Id), signDevice)
+			s.deviceStore.Save(signDevice)
 		} else {
 			WriteInternalError(response)
 			return
@@ -174,7 +176,8 @@ func (s *Server) signData(transaction *domain.Transaction, signDevice *domain.Si
 			return nil, err
 		}
 	}
-	signedData, err := signer.Sign(strconv.Itoa(signDevice.Counter()), transaction.Data, lastSignatureEncoded)
+	composedString := fmt.Sprintf("%s_%s_%s", strconv.Itoa(signDevice.Counter()), transaction.Data, lastSignatureEncoded)
+	signedData, err := signer.Sign([]byte(composedString))
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +187,7 @@ func (s *Server) signData(transaction *domain.Transaction, signDevice *domain.Si
 	// response
 	resp := &domain.SignatureResponse{
 		Signature:  transaction,
-		SignedData: signedData,
+		SignedData: string(signedData),
 	}
 	return resp, nil
 

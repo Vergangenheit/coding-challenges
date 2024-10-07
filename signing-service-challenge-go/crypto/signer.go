@@ -1,36 +1,28 @@
 package crypto
 
-import "fmt"
-
 // Signer defines a contract for different types of signing implementations.
 type Signer interface {
-	// Sign(dataToBeSigned []byte) ([]byte, error)
-	Sign(deviceCounter, dataToBeSigned, lastSignatureEncoded string) (string, error)
+	Sign(dataToBeSigned []byte) ([]byte, error)
 }
 
-// TODO: implement RSA and ECDSA signing ...
 type RSASigner struct{}
 
-func NewRSASigner() *RSASigner {
+func NewRSASigner() Signer {
 	return &RSASigner{}
 }
 
-func (s *RSASigner) Sign(deviceCounter, dataToBeSigned, lastSignatureEncoded string) (string, error) {
-	if deviceCounter == "" || dataToBeSigned == "" || lastSignatureEncoded == "" {
-		return "", fmt.Errorf("signature data must not be empty")
-	}
-	return fmt.Sprintf("%s_%s_%s", deviceCounter, dataToBeSigned, lastSignatureEncoded), nil
+func (s *RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
+
+	return dataToBeSigned, nil
 }
 
 type ECDSASigner struct{}
 
-func NewECDSASigner() *ECDSASigner {
+func NewECDSASigner() Signer {
 	return &ECDSASigner{}
 }
 
-func (s *ECDSASigner) Sign(deviceCounter, dataToBeSigned, lastSignatureEncoded string) (string, error) {
-	if deviceCounter == "" || dataToBeSigned == "" || lastSignatureEncoded == "" {
-		return "", fmt.Errorf("signature data must not be empty")
-	}
-	return fmt.Sprintf("%s_%s_%s", deviceCounter, dataToBeSigned, lastSignatureEncoded), nil
+func (s *ECDSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
+
+	return dataToBeSigned, nil
 }

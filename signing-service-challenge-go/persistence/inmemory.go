@@ -5,15 +5,24 @@ import (
 	"github.com/google/uuid"
 )
 
+type DeviceStore interface {
+	Save(value *domain.SignatureDevice)
+	GetById(id string) *domain.SignatureDevice
+	GetAll() []interface{}
+}
+
 // TODO: in-memory persistence ...
 type InMemoryDeviceStore map[string]interface{}
 
-func NewInMemoryDeviceStore() *InMemoryDeviceStore {
+func NewInMemoryDeviceStore() DeviceStore {
 	return &InMemoryDeviceStore{}
 }
 
-func (p *InMemoryDeviceStore) Save(key string, value interface{}) {
-	(*p)[key] = value
+func (p *InMemoryDeviceStore) Save(value *domain.SignatureDevice) {
+	if value.Id == "" {
+		value.Id = uuid.New().String()
+	}
+	(*p)[value.Id] = value
 }
 
 func (p *InMemoryDeviceStore) GetById(id string) *domain.SignatureDevice {
@@ -33,9 +42,14 @@ func (p *InMemoryDeviceStore) GetAll() []interface{} {
 	return values
 }
 
+type TransactionStore interface {
+	Save(value interface{})
+	GetByDevice(deviceId string) []*domain.Transaction
+}
+
 type InMemoryTransactionStore map[string]interface{}
 
-func NewInMemoryTransactionStore() *InMemoryTransactionStore {
+func NewInMemoryTransactionStore() TransactionStore {
 	return &InMemoryTransactionStore{}
 }
 

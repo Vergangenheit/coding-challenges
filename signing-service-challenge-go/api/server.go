@@ -20,8 +20,8 @@ type ErrorResponse struct {
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
 	listenAddress    string
-	deviceStore      *persistence.InMemoryDeviceStore
-	transactionStore *persistence.InMemoryTransactionStore
+	deviceStore      persistence.DeviceStore
+	transactionStore persistence.TransactionStore
 }
 
 // NewServer is a factory to instantiate a new Server.
@@ -43,7 +43,7 @@ func (s *Server) Run() error {
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
 
 	// TODO: register further HandlerFuncs here ...
-	mux.Handle("/api/v0/device", http.HandlerFunc(s.CreateSignatureDevice))
+	mux.Handle("/api/v0/device", http.HandlerFunc(s.SignatureDevice))
 
 	mux.Handle("/api/v0/transaction", http.HandlerFunc(s.SignTransaction))
 

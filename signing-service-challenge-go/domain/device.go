@@ -1,8 +1,11 @@
 package domain
 
 import (
+	"fmt"
 	"sync"
 	"time"
+
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
 )
 
 type SignatureAlgorithm string
@@ -12,30 +15,55 @@ const (
 	ECDSA SignatureAlgorithm = "ECC"
 )
 
-// KeyPair interface
-type KeyPair interface {
-	PublicKey() interface{}
-	PrivateKey() interface{}
+type DeviceInterface interface {
+	GenerateKeyPair() error
+	IncrementCounter()
+	Counter() int
 }
 
 // signature device domain model ...
 type SignatureDevice struct {
 	Id                 string             `json:"id"`
 	SignatureAlgorithm SignatureAlgorithm `json:"signature_algorithm"`
-	KeyPair            KeyPair            `json:"key_pair"`
+	KeyPair            crypto.KeyPair     `json:"key_pair"`
 	Label              string             `json:"label"`
 	signatureCounter   int
 	mu                 *sync.Mutex
 }
 
-func NewSignatureDevice(algorithm SignatureAlgorithm, keyPair KeyPair, label string) *SignatureDevice {
+func NewSignatureDevice(algorithm SignatureAlgorithm, label string) (*SignatureDevice, error) {
 	dev := &SignatureDevice{
 		SignatureAlgorithm: algorithm,
-		KeyPair:            keyPair,
 		Label:              label,
 	}
+	err := dev.GenerateKeyPair()
+	if err != nil {
+		return nil, err
+	}
 	dev.mu = &sync.Mutex{}
-	return dev
+	return dev, nil
+}
+
+func (d *SignatureDevice) GenerateKeyPair() error {
+	switch d.SignatureAlgorithm {
+	case RSA:
+		gen := crypto.NewRSAGenerator()
+		key, err := gen.Generate()
+		if err != nil {
+			return err
+		}
+		d.KeyPair = key
+	case ECDSA:
+		gen := crypto.NewECCGenerator()
+		key, err := gen.Generate()
+		if err != nil {
+			return err
+		}
+		d.KeyPair = key
+	default:
+		return fmt.Errorf("signature_algorithm must be RSA or ECC")
+	}
+	return nil
 }
 
 func (d *SignatureDevice) IncrementCounter() {

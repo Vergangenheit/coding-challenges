@@ -23,6 +23,10 @@ func (m *MockDeviceStoreRepo) GetAll() []interface{} {
 	return args.Get(0).([]interface{})
 }
 
+func (m *MockDeviceStoreRepo) IncrementCounter(deviceId string) {
+	m.Called(deviceId)
+}
+
 type MockTransactionStoreRepo struct {
 	mock.Mock
 }

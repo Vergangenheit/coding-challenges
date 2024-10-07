@@ -9,6 +9,7 @@ type DeviceStore interface {
 	Save(value *domain.SignatureDevice)
 	GetById(id string) *domain.SignatureDevice
 	GetAll() []interface{}
+	IncrementCounter(deviceId string)
 }
 
 // in-memory persistence ...
@@ -40,6 +41,13 @@ func (p *InMemoryDeviceStore) GetAll() []interface{} {
 		values = append(values, value)
 	}
 	return values
+}
+
+func (p *InMemoryDeviceStore) IncrementCounter(deviceId string) {
+	device := p.GetById(deviceId)
+	if device != nil {
+		device.IncrementCounter()
+	}
 }
 
 type TransactionStore interface {

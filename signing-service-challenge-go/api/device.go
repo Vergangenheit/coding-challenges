@@ -39,35 +39,14 @@ func (s *Server) SignatureDevice(response http.ResponseWriter, request *http.Req
 			return
 		}
 		// generate device
-		var signDevice *domain.SignatureDevice
-		switch createReq.SignatureAlgorithm {
-		case "RSA":
-			// generate key pair
-			gen := crypto.RSAGenerator{}
-			key, err := gen.Generate()
-			if err != nil {
-				WriteErrorResponse(response, http.StatusInternalServerError, []string{
-					http.StatusText(http.StatusInternalServerError),
-				})
-				return
-			}
-			signDevice = domain.NewSignatureDevice(createReq.SignatureAlgorithm, key, createReq.Label)
-		case "ECC":
-			gen := crypto.ECCGenerator{}
-			key, err := gen.Generate()
-			if err != nil {
-				WriteErrorResponse(response, http.StatusInternalServerError, []string{
-					http.StatusText(http.StatusInternalServerError),
-				})
-				return
-			}
-			signDevice = domain.NewSignatureDevice(createReq.SignatureAlgorithm, key, createReq.Label)
-		default:
+		signDevice, err := domain.NewSignatureDevice(createReq.SignatureAlgorithm, createReq.Label)
+		if err != nil {
 			WriteErrorResponse(response, http.StatusBadRequest, []string{
-				"signature_algorithm must be RSA or ECC",
+				err.Error(),
 			})
 			return
 		}
+
 		// persist signDevice
 		if s.deviceStore != nil {
 			s.deviceStore.Save(signDevice)
@@ -152,7 +131,7 @@ func (s *Server) SignTransaction(response http.ResponseWriter, request *http.Req
 			return
 		}
 		// increment counter
-		signDevice.IncrementCounter()
+		s.deviceStore.IncrementCounter(transactionToBeSigned.DeviceId)
 
 	default:
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{

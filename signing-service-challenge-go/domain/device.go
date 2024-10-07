@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 type SignatureAlgorithm string
 
@@ -22,10 +25,23 @@ type SignatureDevice struct {
 	KeyPair            KeyPair            `json:"key_pair"`
 	Label              string             `json:"label"`
 	signatureCounter   int
+	mu                 *sync.Mutex
+}
+
+func NewSignatureDevice(algorithm SignatureAlgorithm, keyPair KeyPair, label string) *SignatureDevice {
+	dev := &SignatureDevice{
+		SignatureAlgorithm: algorithm,
+		KeyPair:            keyPair,
+		Label:              label,
+	}
+	dev.mu = &sync.Mutex{}
+	return dev
 }
 
 func (d *SignatureDevice) IncrementCounter() {
+	d.mu.Lock()
 	d.signatureCounter++
+	d.mu.Unlock()
 }
 
 func (d *SignatureDevice) Counter() int {

@@ -15,6 +15,11 @@ import (
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
 )
 
+type CreateDeviceRequest struct {
+	SignatureAlgorithm domain.SignatureAlgorithm `json:"signature_algorithm"`
+	Label              string                    `json:"label"`
+}
+
 // TODO: REST endpoints ...
 func (s *Server) SignatureDevice(response http.ResponseWriter, request *http.Request) {
 	switch request.Method {
@@ -26,16 +31,18 @@ func (s *Server) SignatureDevice(response http.ResponseWriter, request *http.Req
 			return
 		}
 		// decode body
-		signDevice := &domain.SignatureDevice{}
-		if err := json.NewDecoder(request.Body).Decode(signDevice); err != nil {
+		createReq := &CreateDeviceRequest{}
+		if err := json.NewDecoder(request.Body).Decode(createReq); err != nil {
 			WriteErrorResponse(response, http.StatusBadRequest, []string{
 				http.StatusText(http.StatusBadRequest),
 			})
 			return
 		}
-		// generate key pair
-		switch signDevice.SignatureAlgorithm {
+		// generate device
+		var signDevice *domain.SignatureDevice
+		switch createReq.SignatureAlgorithm {
 		case "RSA":
+			// generate key pair
 			gen := crypto.RSAGenerator{}
 			key, err := gen.Generate()
 			if err != nil {
@@ -44,7 +51,7 @@ func (s *Server) SignatureDevice(response http.ResponseWriter, request *http.Req
 				})
 				return
 			}
-			signDevice.KeyPair = key
+			signDevice = domain.NewSignatureDevice(createReq.SignatureAlgorithm, key, createReq.Label)
 		case "ECC":
 			gen := crypto.ECCGenerator{}
 			key, err := gen.Generate()
@@ -54,7 +61,7 @@ func (s *Server) SignatureDevice(response http.ResponseWriter, request *http.Req
 				})
 				return
 			}
-			signDevice.KeyPair = key
+			signDevice = domain.NewSignatureDevice(createReq.SignatureAlgorithm, key, createReq.Label)
 		default:
 			WriteErrorResponse(response, http.StatusBadRequest, []string{
 				"signature_algorithm must be RSA or ECC",

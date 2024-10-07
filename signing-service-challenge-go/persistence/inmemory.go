@@ -11,7 +11,7 @@ type DeviceStore interface {
 	GetAll() []interface{}
 }
 
-// TODO: in-memory persistence ...
+// in-memory persistence ...
 type InMemoryDeviceStore map[string]interface{}
 
 func NewInMemoryDeviceStore() DeviceStore {

@@ -18,7 +18,7 @@ type KeyPair interface {
 	PrivateKey() interface{}
 }
 
-// TODO: signature device domain model ...
+// signature device domain model ...
 type SignatureDevice struct {
 	Id                 string             `json:"id"`
 	SignatureAlgorithm SignatureAlgorithm `json:"signature_algorithm"`

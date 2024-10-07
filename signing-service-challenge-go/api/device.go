@@ -20,7 +20,7 @@ type CreateDeviceRequest struct {
 	Label              string                    `json:"label"`
 }
 
-// TODO: REST endpoints ...
+// REST endpoints ...
 func (s *Server) SignatureDevice(response http.ResponseWriter, request *http.Request) {
 	switch request.Method {
 	case http.MethodPost:
@@ -75,7 +75,7 @@ func (s *Server) SignatureDevice(response http.ResponseWriter, request *http.Req
 			WriteInternalError(response)
 			return
 		}
-		// TODO write response
+		// write response
 		WriteAPIResponse(response, http.StatusCreated, signDevice)
 	case http.MethodGet:
 		// get all devices

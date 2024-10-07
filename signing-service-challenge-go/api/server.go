@@ -29,8 +29,7 @@ func NewServer(listenAddress string) *Server {
 	devicePersistence := persistence.NewInMemoryDeviceStore()
 	transactionPersistence := persistence.NewInMemoryTransactionStore()
 	return &Server{
-		listenAddress: listenAddress,
-		// TODO: add services / further dependencies here ...
+		listenAddress:    listenAddress,
 		deviceStore:      devicePersistence,
 		transactionStore: transactionPersistence,
 	}
@@ -42,7 +41,7 @@ func (s *Server) Run() error {
 
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
 
-	// TODO: register further HandlerFuncs here ...
+	// register further HandlerFuncs here ...
 	mux.Handle("/api/v0/device", http.HandlerFunc(s.SignatureDevice))
 
 	mux.Handle("/api/v0/transaction", http.HandlerFunc(s.SignTransaction))

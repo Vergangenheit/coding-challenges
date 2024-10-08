@@ -119,7 +119,7 @@ func (s *Server) SignTransaction(response http.ResponseWriter, request *http.Req
 			return
 		}
 		// increment counter
-		signDevice.IncrementCounter()
+		s.deviceStore.IncrementCounter(transactionToBeSigned.DeviceId)
 
 	case "ECC":
 		eccSigner := crypto.NewECDSASigner()
